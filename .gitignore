@@ -1,0 +1,28 @@
+# Environments & secrets
+.env
+.env.*
+backend/.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+backend/.venv/
+.venv/
+env/
+venv/
+ENV/
+
+# Node
+node_modules/
+demo_recorder/
+
+# Media & Videos
+*.mp4
+*.webm
+
+# OS & Editor
+.DS_Store
+Thumbs.db

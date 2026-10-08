@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Editor from '@monaco-editor/react';
-import { Copy, Check, Loader2, AlertCircle } from 'lucide-react';
+import { Copy, Check, Loader2, AlertCircle, Lock, ExternalLink } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 export default function APIPulse() {
@@ -24,23 +24,22 @@ export default function APIPulse() {
     setMockUrl('');
 
     try {
-      // Basic JSON validation before sending
       try {
         JSON.parse(jsonInput);
       } catch (e) {
         throw new Error("Invalid JSON in input.");
       }
 
-      // Get real session for Auth token
+      // Get user session token if authenticated
       const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token;
+      const token = session?.access_token || "";
 
-      // Backend route is /api/generate
-      const response = await fetch('http://localhost:8000/api/generate', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${apiUrl}/api/generate?method=${method}&path=${encodeURIComponent(path)}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` })
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         },
         body: jsonInput,
       });
@@ -53,14 +52,8 @@ export default function APIPulse() {
 
       const data = await response.json();
       
-      // Update Spec
       setOpenApiSpec(JSON.stringify(data.openapi_spec, null, 2));
-      
-      // Construct Mock URL based on response and user input path
-      const baseMockUrl = data.mock_url || `https://your-worker.workers.dev/mock/${data.schema_id}`;
-      // Append the custom path the user wants
-      const finalUrl = `${baseMockUrl}${path.startsWith('/') ? path : '/' + path}`;
-      setMockUrl(finalUrl);
+      setMockUrl(data.mock_url || "");
 
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred.");
@@ -77,13 +70,10 @@ export default function APIPulse() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-50 flex flex-col font-sans">
-      
-      {/* Header */}
-      <header className="border-b border-neutral-800 bg-neutral-900 px-6 py-4 flex items-center justify-between">
-        <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-transparent">
-          API-Pulse
-        </h1>
+    <div className="flex-1 flex flex-col w-full h-full">
+      {/* Action Bar (Header was moved to layout) */}
+      <div className="bg-neutral-900 border-b border-neutral-800 p-4 flex justify-between items-center">
+        <h2 className="text-lg font-medium text-neutral-200">Generator</h2>
         <button 
           onClick={handleGenerate}
           disabled={isLoading}
@@ -92,18 +82,40 @@ export default function APIPulse() {
           {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
           {isLoading ? 'Generating...' : 'Generate Spec & Mock'}
         </button>
-      </header>
+      </div>
 
-      {/* Error Toast */}
+      {/* Error / Paywall Toast */}
       {error && (
-        <div className="bg-red-900/50 border border-red-500/50 text-red-200 px-4 py-3 mx-6 mt-6 rounded-md flex items-center gap-3">
-          <AlertCircle className="w-5 h-5 text-red-400" />
-          <p>{error}</p>
-        </div>
+        error.includes("Payment Required") ? (
+          <div className="bg-indigo-900/40 border border-indigo-500/50 text-indigo-100 px-6 py-5 mx-6 mt-6 rounded-lg flex flex-col md:flex-row items-center justify-between gap-4 shadow-lg">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-indigo-500/20 rounded-full">
+                <Lock className="w-6 h-6 text-indigo-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-white">Upgrade to Pro</h3>
+                <p className="text-sm text-indigo-200">You've reached your limit of 10 free generations. Upgrade to unlock unlimited AI power.</p>
+              </div>
+            </div>
+            <a 
+              href={process.env.NEXT_PUBLIC_LEMON_SQUEEZY_CHECKOUT_URL || "#"} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2.5 rounded-md font-medium transition shadow-md whitespace-nowrap"
+            >
+              Upgrade for $15/mo
+            </a>
+          </div>
+        ) : (
+          <div className="bg-red-900/50 border border-red-500/50 text-red-200 px-4 py-3 mx-6 mt-6 rounded-md flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-red-400" />
+            <p>{error}</p>
+          </div>
+        )
       )}
 
       {/* Main Content Split */}
-      <main className="flex-1 flex flex-col md:flex-row p-6 gap-6 overflow-hidden">
+      <main className="flex-1 flex flex-col md:flex-row p-6 gap-6 overflow-hidden min-h-0">
         
         {/* Left Pane: Input */}
         <div className="flex-1 flex flex-col gap-4 border border-neutral-800 bg-neutral-900 rounded-xl p-4 shadow-xl">
@@ -129,7 +141,7 @@ export default function APIPulse() {
             />
           </div>
 
-          <div className="flex-1 rounded-md overflow-hidden border border-neutral-800 mt-2 min-h-[300px]">
+          <div className="flex-1 rounded-md overflow-hidden border border-neutral-800 mt-2 min-h-[200px]">
             <Editor
               height="100%"
               defaultLanguage="json"
@@ -165,11 +177,22 @@ export default function APIPulse() {
               >
                 {copied ? <Check className="w-5 h-5 text-green-400" /> : <Copy className="w-5 h-5" />}
               </button>
+              {mockUrl && (
+                <a
+                  href={mockUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2 rounded-md hover:bg-neutral-800 text-indigo-400 hover:text-indigo-300 transition flex-shrink-0"
+                  title="Test live mock in browser"
+                >
+                  <ExternalLink className="w-5 h-5" />
+                </a>
+              )}
             </div>
           </div>
 
           {/* OpenAPI Spec Editor */}
-          <div className="flex-1 rounded-md overflow-hidden border border-neutral-800 mt-2 min-h-[300px]">
+          <div className="flex-1 rounded-md overflow-hidden border border-neutral-800 mt-2 min-h-[200px]">
             <Editor
               height="100%"
               defaultLanguage="json"

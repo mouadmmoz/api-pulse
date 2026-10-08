@@ -10,9 +10,9 @@ export default {
     
     const token = pathParts[1];
     
-    // Fetch from Supabase REST API
+    // Fetch from Supabase REST API securely using Service Role Key (since RLS is locked down)
     const supabaseUrl = env.SUPABASE_URL;
-    const supabaseKey = env.SUPABASE_ANON_KEY;
+    const supabaseKey = env.SUPABASE_SERVICE_ROLE_KEY;
     
     if (!supabaseUrl || !supabaseKey) {
       return new Response('Edge configuration missing', { status: 500 });
