@@ -84,34 +84,36 @@ export default function APIPulse() {
         </button>
       </div>
 
-      {/* Error / Paywall Toast */}
-      {error && (
-        error.includes("Payment Required") ? (
-          <div className="bg-indigo-900/40 border border-indigo-500/50 text-indigo-100 px-6 py-5 mx-6 mt-6 rounded-lg flex flex-col md:flex-row items-center justify-between gap-4 shadow-lg">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-indigo-500/20 rounded-full">
-                <Lock className="w-6 h-6 text-indigo-400" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-white">Upgrade to Pro</h3>
-                <p className="text-sm text-indigo-200">You've reached your limit of 10 free generations. Upgrade to unlock unlimited AI power.</p>
-              </div>
+      {/* Error Toast (Paywall banner commented out for 100% free beta) */}
+      {/* 
+      PAYMENT / PAYWALL TOAST - COMMENTED OUT FOR FREE BETA
+      {error && error.includes("Payment Required") && (
+        <div className="bg-indigo-900/40 border border-indigo-500/50 text-indigo-100 px-6 py-5 mx-6 mt-6 rounded-lg flex flex-col md:flex-row items-center justify-between gap-4 shadow-lg">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-indigo-500/20 rounded-full">
+              <Lock className="w-6 h-6 text-indigo-400" />
             </div>
-            <a 
-              href={process.env.NEXT_PUBLIC_LEMON_SQUEEZY_CHECKOUT_URL || "#"} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2.5 rounded-md font-medium transition shadow-md whitespace-nowrap"
-            >
-              Upgrade for $15/mo
-            </a>
+            <div>
+              <h3 className="text-lg font-semibold text-white">Upgrade to Pro</h3>
+              <p className="text-sm text-indigo-200">You've reached your limit of 10 free generations. Upgrade to unlock unlimited AI power.</p>
+            </div>
           </div>
-        ) : (
-          <div className="bg-red-900/50 border border-red-500/50 text-red-200 px-4 py-3 mx-6 mt-6 rounded-md flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 text-red-400" />
-            <p>{error}</p>
-          </div>
-        )
+          <a 
+            href={process.env.NEXT_PUBLIC_LEMON_SQUEEZY_CHECKOUT_URL || "#"} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2.5 rounded-md font-medium transition shadow-md whitespace-nowrap"
+          >
+            Upgrade for $15/mo
+          </a>
+        </div>
+      )}
+      */}
+      {error && (
+        <div className="bg-red-900/50 border border-red-500/50 text-red-200 px-4 py-3 mx-6 mt-6 rounded-md flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 text-red-400" />
+          <p>{error}</p>
+        </div>
       )}
 
       {/* Main Content Split */}

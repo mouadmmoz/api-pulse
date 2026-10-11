@@ -26,7 +26,8 @@ from slowapi.errors import RateLimitExceeded
 from starlette.middleware.base import BaseHTTPMiddleware
 
 # Configurations
-LEMON_SQUEEZY_WEBHOOK_SECRET = os.getenv("LEMON_SQUEEZY_WEBHOOK_SECRET", "test-secret")
+# [PAYMENT SYSTEM COMMENTED OUT - 100% Free Beta Mode]
+# LEMON_SQUEEZY_WEBHOOK_SECRET = os.getenv("LEMON_SQUEEZY_WEBHOOK_SECRET", "test-secret")
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,https://api-pulse.com").split(",")
@@ -296,47 +297,52 @@ async def serve_mock_endpoint(request: Request, schema_id: str, subpath: str = "
         }
     )
 
-@app.post("/api/webhook/lemonsqueezy")
-@limiter.limit("10/minute") # Rate limit webhook endpoint
-async def lemonsqueezy_webhook(request: Request, x_signature: str = Header(None)):
-    body = await request.body()
-    
-    # 1. Verify HMAC Signature
-    if not LEMON_SQUEEZY_WEBHOOK_SECRET:
-        raise HTTPException(status_code=500, detail="Webhook secret not configured")
-    if not x_signature:
-        raise HTTPException(status_code=401, detail="Missing signature")
-        
-    digest = hmac.new(
-        LEMON_SQUEEZY_WEBHOOK_SECRET.encode("utf-8"),
-        body,
-        hashlib.sha256
-    ).hexdigest()
-    
-    if not hmac.compare_digest(digest, x_signature):
-        raise HTTPException(status_code=401, detail="Invalid signature")
-        
-    # 2. Process Event securely
-    try:
-        data = json.loads(body.decode("utf-8"))
-        event_name = data.get("meta", {}).get("event_name")
-        
-        if event_name == "subscription_created":
-            custom_data = data.get("meta", {}).get("custom_data", {})
-            user_id = custom_data.get("user_id")
-            
-            if user_id and supabase:
-                try:
-                    # Update securely using service_role
-                    supabase.table("users").update({"tier": "pro"}).eq("id", user_id).execute()
-                    return {"status": "success", "message": "User upgraded successfully"}
-                except Exception as e:
-                    print(f"Error updating user: {e}")
-                    raise HTTPException(status_code=500, detail="Database update failed")
-            else:
-                return {"status": "ignored", "message": "No user_id found or Supabase not configured"}
-                
-        return {"status": "ignored", "message": f"Unhandled event {event_name}"}
-        
-    except json.JSONDecodeError:
-        raise HTTPException(status_code=400, detail="Invalid JSON")
+# ==============================================================================
+# PAYMENT WEBHOOK (LEMON SQUEEZY) - COMMENTED OUT FOR FREE BETA / PORTFOLIO MODE
+# Uncomment below to re-enable Lemon Squeezy subscription webhooks.
+# ==============================================================================
+# @app.post("/api/webhook/lemonsqueezy")
+# @limiter.limit("10/minute") # Rate limit webhook endpoint
+# async def lemonsqueezy_webhook(request: Request, x_signature: str = Header(None)):
+#     body = await request.body()
+#     
+#     # 1. Verify HMAC Signature
+#     if not LEMON_SQUEEZY_WEBHOOK_SECRET:
+#         raise HTTPException(status_code=500, detail="Webhook secret not configured")
+#     if not x_signature:
+#         raise HTTPException(status_code=401, detail="Missing signature")
+#         
+#     digest = hmac.new(
+#         LEMON_SQUEEZY_WEBHOOK_SECRET.encode("utf-8"),
+#         body,
+#         hashlib.sha256
+#     ).hexdigest()
+#     
+#     if not hmac.compare_digest(digest, x_signature):
+#         raise HTTPException(status_code=401, detail="Invalid signature")
+#         
+#     # 2. Process Event securely
+#     try:
+#         data = json.loads(body.decode("utf-8"))
+#         event_name = data.get("meta", {}).get("event_name")
+#         
+#         if event_name == "subscription_created":
+#             custom_data = data.get("meta", {}).get("custom_data", {})
+#             user_id = custom_data.get("user_id")
+#             
+#             if user_id and supabase:
+#                 try:
+#                     # Update securely using service_role
+#                     supabase.table("users").update({"tier": "pro"}).eq("id", user_id).execute()
+#                     return {"status": "success", "message": "User upgraded successfully"}
+#                 except Exception as e:
+#                     print(f"Error updating user: {e}")
+#                     raise HTTPException(status_code=500, detail="Database update failed")
+#             else:
+#                 return {"status": "ignored", "message": "No user_id found or Supabase not configured"}
+#                 
+#         return {"status": "ignored", "message": f"Unhandled event {event_name}"}
+#         
+#     except json.JSONDecodeError:
+#         raise HTTPException(status_code=400, detail="Invalid JSON")
+

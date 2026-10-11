@@ -122,12 +122,21 @@ export default function LandingPage() {
                 <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-indigo-400" /> Priority Support</li>
               </ul>
               
+              {/* 
+              PAYMENT CHECKOUT LINK - COMMENTED OUT FOR FREE BETA
               <a 
                 href={process.env.NEXT_PUBLIC_LEMON_SQUEEZY_CHECKOUT_URL || "#"} 
                 className="w-full h-12 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-medium flex items-center justify-center transition shadow-lg shadow-indigo-500/25"
               >
                 Upgrade to Pro
               </a>
+              */}
+              <Link 
+                href="/register" 
+                className="w-full h-12 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-medium flex items-center justify-center transition shadow-lg shadow-indigo-500/25"
+              >
+                Get Started Free (Public Beta)
+              </Link>
             </div>
           </div>
         </div>

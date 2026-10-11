@@ -27,7 +27,9 @@ export default function DashboardLayout({
             <Link href="/dashboard" className="hover:text-white transition">Generator</Link>
             <Link href="/dashboard/history" className="hover:text-white transition">History</Link>
             <Link href="/dashboard/keys" className="hover:text-white transition">API Keys</Link>
+            {/* PAYMENT LINK - COMMENTED OUT FOR FREE BETA
             <Link href="/pricing" className="hover:text-white transition">Upgrade</Link>
+            */}
           </nav>
         </div>
         <div className="flex items-center gap-4">
