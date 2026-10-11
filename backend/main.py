@@ -92,16 +92,21 @@ async def get_current_user(credentials: Optional[HTTPAuthorizationCredentials] =
             user_res = supabase.auth.get_user(token)
             if user_res and user_res.user:
                 user_id = user_res.user.id
+                email = user_res.user.email or ""
                 tier = "free"
                 try:
-                    profile_res = supabase.table("users").select("tier").eq("id", user_id).execute()
+                    profile_res = supabase.table("users").upsert({
+                        "id": user_id,
+                        "email": email,
+                        "tier": "free"
+                    }, on_conflict="id").execute()
                     if profile_res.data and isinstance(profile_res.data, list) and len(profile_res.data) > 0:
                         first_row = profile_res.data[0]
                         if isinstance(first_row, dict):
                             tier = str(first_row.get("tier", "free"))
-                except Exception:
-                    pass
-                return {"id": user_id, "tier": tier, "email": user_res.user.email}
+                except Exception as e:
+                    print(f"Error ensuring public.users row: {e}")
+                return {"id": user_id, "tier": tier, "email": email}
         except Exception:
             pass
     return {"id": None, "tier": "free"}
