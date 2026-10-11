@@ -39,12 +39,17 @@ export default function Register() {
       const { data, error: authError } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: typeof window !== 'undefined' ? `${window.location.origin}/dashboard` : undefined,
+        },
       });
 
       if (authError) {
         setError(authError.message || 'Registration failed');
+      } else if (data?.user && (!data.session || data.user.identities?.length === 0)) {
+        setSuccess(`Un e-mail de confirmation a été envoyé à ${email}. Veuillez vérifier votre boîte de réception (et vos spams) et cliquer sur le lien pour activer votre compte !`);
       } else {
-        setSuccess("Registration successful! You can now log in.");
+        setSuccess("Inscription réussie ! Un e-mail de confirmation a été envoyé à votre adresse.");
       }
     } catch (err) {
       setError('An unexpected error occurred');

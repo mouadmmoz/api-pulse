@@ -47,7 +47,12 @@ export default function Login() {
         router.push('/dashboard');
       }
     } catch (err: any) {
-      setError(err.message || 'Invalid login credentials');
+      const msg = err.message || '';
+      if (msg.toLowerCase().includes('email not confirmed')) {
+        setError("Votre adresse e-mail n'a pas encore été confirmée. Veuillez vérifier votre boîte de réception (et vos spams) et cliquer sur le lien d'activation.");
+      } else {
+        setError(msg || 'Identifiants de connexion invalides.');
+      }
     } finally {
       setLoading(false);
     }
