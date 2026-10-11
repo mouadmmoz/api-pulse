@@ -28,7 +28,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 # Configurations
 # [PAYMENT SYSTEM COMMENTED OUT - 100% Free Beta Mode]
 # LEMON_SQUEEZY_WEBHOOK_SECRET = os.getenv("LEMON_SQUEEZY_WEBHOOK_SECRET", "test-secret")
-SUPABASE_URL = os.getenv("SUPABASE_URL", "")
+SUPABASE_URL = os.getenv("SUPABASE_URL", "https://qskilkgrignvkqvspyia.supabase.co")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,https://api-pulse.com").split(",")
 
