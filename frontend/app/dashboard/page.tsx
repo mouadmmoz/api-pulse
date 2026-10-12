@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Editor from '@monaco-editor/react';
 import { Copy, Check, Loader2, AlertCircle, Lock, ExternalLink } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 export default function APIPulse() {
+  const router = useRouter();
   const [path, setPath] = useState('/api/users');
   const [method, setMethod] = useState('GET');
   const [jsonInput, setJsonInput] = useState('{\n  "id": 1,\n  "name": "Jane Doe",\n  "email": "jane@example.com"\n}');
@@ -30,9 +32,13 @@ export default function APIPulse() {
         throw new Error("Invalid JSON in input.");
       }
 
-      // Get user session token if authenticated
+      // Check user session
       const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token || "";
+      if (!session) {
+        router.push('/login');
+        throw new Error("Votre session a expiré. Veuillez vous reconnecter pour enregistrer vos schémas.");
+      }
+      const token = session.access_token;
 
       const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? (typeof window !== 'undefined' && window.location.hostname === 'localhost' ? 'http://localhost:8000' : '');
       const response = await fetch(`${apiUrl}/api/generate?method=${method}&path=${encodeURIComponent(path)}`, {
